@@ -1,0 +1,30 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "baseUrl": ".",
+        "sourceMap": true,
+        "inlineSources": true,
+        "declaration": false,
+        "skipDefaultLibCheck": true,
+        "module": "es2020",
+        "moduleResolution": "node",
+        "forceConsistentCasingInFileNames": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "target": "es2020",
+        "lib": [
+            "es2018",
+            "dom"
+        ],
+    },
+    "files": [
+        "src/main.ts"
+    ],
+    "angularCompilerOptions": {
+        "strictInjectionParameters": true,
+        "strictInputAccessModifier": true,
+        "strictTemplates": true
+    }
+}
