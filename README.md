@@ -3,7 +3,7 @@ Rollup Plugin for Angular AOT Compilation
 
 Inspired by [Angular CLI esbuild plugin](https://github.com/angular/angular-cli/blob/main/packages/angular_devkit/build_angular/src/builders/browser-esbuild/compiler-plugin.ts)
 
-Currently this project is working in progress. It doesn't support JIT compilation and watch mode build.
+Currently this project is working in progress. It doesn't support JIT compilation.
 
 ### Example
 
