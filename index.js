@@ -6,7 +6,6 @@ const { transformAsync } = require('@babel/core');
 const babelTypes = require('@babel/types');
 const angularApplicationPreset =
   require('@angular-devkit/build-angular/src/babel/presets/application').default;
-const {} = require('@angular-devkit/build-angular/src/builders/browser-esbuild/')
 const { StylesheetProcessor } = require('ng-packagr/lib/styles/stylesheet-processor');
 
 let needsLinking;
@@ -177,6 +176,7 @@ module.exports = function angular(pluginOptions) {
   const ref_file_ids = new Map();
   const babelDataCache = new Map();
   const diagnosticCache = new WeakMap();
+  const resourceFileMap = new Map();
   const sourceFileCache = new SourceFileCache();
 
   return {
@@ -255,16 +255,18 @@ module.exports = function angular(pluginOptions) {
         });
 
         if (context.resourceFile) {
-          this.addWatchFile(context.resourceFile);
+          const files = resourceFileMap.get(context.containingFile) ?? new Set();
+
+          files.add(context.resourceFile);
+
+          resourceFileMap.set(context.containingFile, files);
         }
 
         return { content };
       };
 
       // Allow the AOT compiler to request the set of changed templates and styles
-      host.getModifiedResourceFiles = function () {
-        return sourceFileCache.modifiedFiles;
-      };
+      host.getModifiedResourceFiles = () => sourceFileCache.modifiedFiles;
 
       // Augment TypeScript Host for file replacements option
       if (pluginOptions.fileReplacements) {
@@ -486,6 +488,12 @@ module.exports = function angular(pluginOptions) {
           sourceFileCache?.typeScriptFileCache.set(pathToFileURL(request).href, codeAndMap);
         }
 
+        const resourceFiles = resourceFileMap.get(request) ?? new Set();
+
+        for (const resourceFile of resourceFiles) {
+          this.addWatchFile(resourceFile);
+        }
+
         return codeAndMap;
       } else if (/\.[cm]?js$/.test(id)) {
         let codeAndMap = sourceFileCache?.babelFileCache.get(id);
@@ -500,6 +508,19 @@ module.exports = function angular(pluginOptions) {
       }
 
       return null;
+    },
+    watchChange(id, { event }) {
+      sourceFileCache.invalidate([id]);
+
+      if (event === 'delete') {
+        for (const [key, files] of resourceFileMap) {
+          if (files.has(id)) {
+            files.delete(id);
+
+            resourceFileMap.set(key, files);
+          }
+        }
+      }
     },
   };
 };
