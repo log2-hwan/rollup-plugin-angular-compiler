@@ -23,6 +23,6 @@ export class PageAppComponent {}
       },
     ]),
   ],
-  declarations: [PageAppComponent]
+  declarations: [PageAppComponent],
 })
 export class PageModule {}

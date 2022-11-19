@@ -64,9 +64,7 @@ async function transformWithBabel(filename, data, pluginOptions, plugins = []) {
   const angularPackage = /[\\/]node_modules[\\/]@angular[\\/]/.test(filename);
 
   const linkerPluginCreator = shouldLink
-    ? (
-        await import('@angular/compiler-cli/linker/babel')
-      ).createEs2015LinkerPlugin
+    ? (await import('@angular/compiler-cli/linker/babel')).createEs2015LinkerPlugin
     : undefined;
 
   const result = await transformAsync(data, {
@@ -108,7 +106,7 @@ function findAffectedFiles(
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const result = builder.getSemanticDiagnosticsOfNextAffectedFile(undefined, (sourceFile) => {
+    const result = builder.getSemanticDiagnosticsOfNextAffectedFile(undefined, sourceFile => {
       // If the affected file is a TTC shim, add the shim's original source file.
       // This ensures that changes that affect TTC are typechecked even when the changes
       // are otherwise unrelated from a TS perspective and do not result in Ivy codegen changes.
@@ -184,15 +182,17 @@ module.exports = function angular(pluginOptions) {
   return {
     name: 'angular',
     async buildStart() {
-      const { NgtscProgram, OptimizeFor, readConfiguration, formatDiagnostics } = await import('@angular/compiler-cli');
+      const { NgtscProgram, OptimizeFor, readConfiguration, formatDiagnostics } = await import(
+        '@angular/compiler-cli'
+      );
       const {
         augmentProgramWithVersioning,
         augmentHostWithReplacements,
-        augmentHostWithCaching
-      } = require('@ngtools/webpack/src/ivy/host')
+        augmentHostWithCaching,
+      } = require('@ngtools/webpack/src/ivy/host');
       const {
         mergeTransformers,
-        createAotTransformers
+        createAotTransformers,
       } = require('@ngtools/webpack/src/ivy/transformation');
 
       const {
@@ -286,7 +286,11 @@ module.exports = function angular(pluginOptions) {
 
       augmentProgramWithVersioning(typeScriptProgram);
 
-      const builder = ts.createEmitAndSemanticDiagnosticsBuilderProgram(typeScriptProgram, host, previousBuilder);
+      const builder = ts.createEmitAndSemanticDiagnosticsBuilderProgram(
+        typeScriptProgram,
+        host,
+        previousBuilder
+      );
       previousBuilder = builder;
 
       await angularCompiler.analyzeAsync();
@@ -295,9 +299,7 @@ module.exports = function angular(pluginOptions) {
 
       if (sourceFileCache) {
         for (const affected of affectedFiles) {
-          sourceFileCache.typeScriptFileCache.delete(
-            pathToFileURL(affected.fileName).href,
-          );
+          sourceFileCache.typeScriptFileCache.delete(pathToFileURL(affected.fileName).href);
         }
       }
 
@@ -308,7 +310,8 @@ module.exports = function angular(pluginOptions) {
         yield* builder.getOptionsDiagnostics();
         yield* builder.getGlobalDiagnostics();
 
-        const optimizeFor = affectedFiles.size > 1 ? OptimizeFor.WholeProgram : OptimizeFor.SingleFile;
+        const optimizeFor =
+          affectedFiles.size > 1 ? OptimizeFor.WholeProgram : OptimizeFor.SingleFile;
 
         for (const sourceFile of builder.getSourceFiles()) {
           if (angularCompiler.ignoreForDiagnostics.has(sourceFile)) {
@@ -326,7 +329,10 @@ module.exports = function angular(pluginOptions) {
           // Only request Angular template diagnostics for affected files to avoid
           // overhead of template diagnostics for unchanged files.
           if (affectedFiles.has(sourceFile)) {
-            const angularDiagnostics = angularCompiler.getDiagnosticsForFile(sourceFile, optimizeFor);
+            const angularDiagnostics = angularCompiler.getDiagnosticsForFile(
+              sourceFile,
+              optimizeFor
+            );
 
             diagnosticCache.set(sourceFile, angularDiagnostics);
 
@@ -364,7 +370,7 @@ module.exports = function angular(pluginOptions) {
           angularCompiler.prepareEmit().transformers,
           createAotTransformers(builder, {})
         ),
-        (sourceFile) => angularCompiler.incrementalCompilation.recordSuccessfulEmit(sourceFile),
+        sourceFile => angularCompiler.incrementalCompilation.recordSuccessfulEmit(sourceFile)
       );
 
       const cache = ts.createModuleResolutionCache(
@@ -414,9 +420,7 @@ module.exports = function angular(pluginOptions) {
         // the options cannot change and do not need to be represented in the key. If the
         // cache is later stored to disk, then the options that affect transform output
         // would need to be added to the key as well as a check for any change of content.
-        let codeAndMap = sourceFileCache?.typeScriptFileCache.get(
-          pathToFileURL(request).href,
-        );
+        let codeAndMap = sourceFileCache?.typeScriptFileCache.get(pathToFileURL(request).href);
 
         if (codeAndMap === undefined) {
           const typescriptResult = await fileEmitter(id);
@@ -471,16 +475,13 @@ module.exports = function angular(pluginOptions) {
                     },
                   },
                 }),
-              ]
+              ],
             ]);
 
             babelDataCache.set(data, codeAndMap);
           }
 
-          sourceFileCache?.typeScriptFileCache.set(
-            pathToFileURL(request).href,
-            codeAndMap,
-          );
+          sourceFileCache?.typeScriptFileCache.set(pathToFileURL(request).href, codeAndMap);
         }
 
         return codeAndMap;
@@ -498,6 +499,6 @@ module.exports = function angular(pluginOptions) {
       }
 
       return null;
-    }
+    },
   };
 };

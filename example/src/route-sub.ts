@@ -11,6 +11,6 @@ export class PageSubAppComponent {}
   imports: [
     RouterModule.forChild([{ path: '', pathMatch: 'full', component: PageSubAppComponent }]),
   ],
-  declarations: [PageSubAppComponent]
+  declarations: [PageSubAppComponent],
 })
 export class PageSubModule {}
