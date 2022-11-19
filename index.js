@@ -249,14 +249,16 @@ module.exports = function angular(pluginOptions) {
         }
 
         const file = context.resourceFile ?? context.containingFile;
-        const contents = await processor.process({
+        const content = await processor.process({
           filePath: file,
           content: data,
         });
 
-        this.addWatchFile(file);
+        if (context.resourceFile) {
+          this.addWatchFile(context.resourceFile);
+        }
 
-        return { content: contents };
+        return { content };
       };
 
       // Allow the AOT compiler to request the set of changed templates and styles
@@ -412,7 +414,7 @@ module.exports = function angular(pluginOptions) {
         return null;
       }
     },
-    async load(id) {
+    async transform(code, id) {
       if (/\.[cm]?tsx?$/.test(id)) {
         const request = pluginOptions.fileReplacements?.[id] ?? id;
 
@@ -489,8 +491,7 @@ module.exports = function angular(pluginOptions) {
         let codeAndMap = sourceFileCache?.babelFileCache.get(id);
 
         if (codeAndMap === undefined) {
-          const data = await fs.readFile(id, 'utf-8');
-          codeAndMap = await transformWithBabel(id, data, pluginOptions);
+          codeAndMap = await transformWithBabel(id, code, pluginOptions);
 
           sourceFileCache?.babelFileCache.set(id, codeAndMap);
         }
