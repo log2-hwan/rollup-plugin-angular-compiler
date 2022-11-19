@@ -9,9 +9,8 @@ export class PageSubAppComponent {}
 
 @NgModule({
   imports: [
-    RouterModule.forChild([{ path: '', pathMatch: 'exact', component: PageSubAppComponent }]),
+    RouterModule.forChild([{ path: '', pathMatch: 'full', component: PageSubAppComponent }]),
   ],
-  declarations: [PageSubAppComponent],
-  bootstrap: [PageSubAppComponent],
+  declarations: [PageSubAppComponent]
 })
 export class PageSubModule {}

@@ -1,7 +1,7 @@
 const { rm } = require('fs/promises');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
 const { default: html, makeHtmlAttributes } = require('@rollup/plugin-html');
-const { terser } = require('rollup-plugin-terser');
+const terser = require('@rollup/plugin-terser').default;
 const angular = require('../index');
 
 module.exports = {
@@ -20,8 +20,10 @@ module.exports = {
   preserveEntrySignatures: false,
   plugins: [
     {
-      async buildStart(options) {
-        await rm('build', { recursive: true });
+      async buildStart() {
+        try {
+          await rm('build', { recursive: true });
+        } catch {}
       },
     },
     angular({

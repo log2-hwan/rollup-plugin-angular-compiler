@@ -12,7 +12,7 @@ export class PageAppComponent {}
     RouterModule.forChild([
       {
         path: '',
-        pathMatch: 'exact',
+        pathMatch: 'full',
         component: PageAppComponent,
         children: [
           {
@@ -23,7 +23,6 @@ export class PageAppComponent {}
       },
     ]),
   ],
-  declarations: [PageAppComponent],
-  bootstrap: [PageAppComponent],
+  declarations: [PageAppComponent]
 })
 export class PageModule {}

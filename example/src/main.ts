@@ -16,7 +16,7 @@ export class MainAppComponent {}
     RouterModule.forRoot([
       {
         path: '',
-        pathMatch: 'exact',
+        pathMatch: 'full',
         loadChildren: () => import('./route').then(m => m.PageModule),
       },
     ]),
