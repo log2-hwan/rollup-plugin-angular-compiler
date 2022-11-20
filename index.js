@@ -173,10 +173,11 @@ class SourceFileCache extends Map {
 
 module.exports = function angular(pluginOptions) {
   let fileEmitter, resolveModule, previousAngularProgram, previousBuilder;
-  const ref_file_ids = new Map();
+  const fileReferenceIdMap = new Map();
   const babelDataCache = new Map();
   const diagnosticCache = new WeakMap();
-  const resourceFileMap = new Map();
+  const sourceFileToStyleMap = new Map();
+  const resourceFileToStyleMap = new Map();
   const sourceFileCache = new SourceFileCache();
 
   return {
@@ -219,23 +220,29 @@ module.exports = function angular(pluginOptions) {
       const processor = new StylesheetProcessor(
         process.cwd(),
         process.cwd(),
-        async ({ url, absolutePath }) => {
+        async ({ url, absolutePath }, _, __, ___, ____, { opts }) => {
           const name = path.basename(url);
           const source = await fs.readFile(absolutePath);
 
-          const ref_id = this.emitFile({
+          const referenceId = this.emitFile({
             type: 'asset',
             name,
             source,
           });
           this.addWatchFile(absolutePath);
-          ref_file_ids.set(ref_id, {
+          fileReferenceIdMap.set(referenceId, {
             type: 'asset',
             name,
             source,
           });
 
-          return `%%${ref_id}%%`;
+          const referencingStyleFiles = resourceFileToStyleMap.get(absolutePath) ?? new Set();
+
+          referencingStyleFiles.add(opts.from);
+
+          resourceFileToStyleMap.set(absolutePath, referencingStyleFiles);
+
+          return `%%${referenceId}%%`;
         },
         []
       );
@@ -255,11 +262,11 @@ module.exports = function angular(pluginOptions) {
         });
 
         if (context.resourceFile) {
-          const files = resourceFileMap.get(context.containingFile) ?? new Set();
+          const files = sourceFileToStyleMap.get(context.containingFile) ?? new Set();
 
           files.add(context.resourceFile);
 
-          resourceFileMap.set(context.containingFile, files);
+          sourceFileToStyleMap.set(context.containingFile, files);
         }
 
         return { content };
@@ -303,7 +310,10 @@ module.exports = function angular(pluginOptions) {
 
       if (sourceFileCache) {
         for (const affected of affectedFiles) {
-          sourceFileCache.typeScriptFileCache.delete(pathToFileURL(affected.fileName).href);
+          const affectedFilePath = pathToFileURL(affected.fileName).href;
+
+          sourceFileToStyleMap.delete(affectedFilePath);
+          sourceFileCache.typeScriptFileCache.delete(affectedFilePath);
         }
       }
 
@@ -388,7 +398,7 @@ module.exports = function angular(pluginOptions) {
           .resolvedModule;
       };
 
-      for (const [, asset] of ref_file_ids) {
+      for (const [, asset] of fileReferenceIdMap) {
         this.emitFile(asset);
       }
     },
@@ -410,7 +420,7 @@ module.exports = function angular(pluginOptions) {
       return null;
     },
     resolveFileUrl({ relativePath, referenceId }) {
-      if (ref_file_ids.has(referenceId)) {
+      if (fileReferenceIdMap.has(referenceId)) {
         return `'${relativePath}'`;
       } else {
         return null;
@@ -450,8 +460,9 @@ module.exports = function angular(pluginOptions) {
                         path.parentPath.node.type === 'ObjectProperty' &&
                         path.parentPath.node.key.name === 'styles'
                       ) {
-                        path.node.elements = path.node.elements.map(({ value }, i) => {
+                        path.node.elements = path.node.elements.map(({ value }) => {
                           const tokens = value.split(/\%\%(\S+)\%\%/);
+                          const referenceIds = tokens.filter((_, i) => i % 2 === 1);
 
                           return babelTypes.templateLiteral(
                             tokens
@@ -462,15 +473,14 @@ module.exports = function angular(pluginOptions) {
                                   i === path.node.elements.length - 1
                                 )
                               ),
-                            tokens
-                              .filter((_, i) => i % 2 === 1)
-                              .map(matched_str =>
+                            referenceIds
+                              .map(referenceId =>
                                 babelTypes.memberExpression(
                                   babelTypes.metaProperty(
                                     babelTypes.identifier('import'),
                                     babelTypes.identifier('meta')
                                   ),
-                                  babelTypes.identifier(`ROLLUP_FILE_URL_${matched_str}`)
+                                  babelTypes.identifier(`ROLLUP_FILE_URL_${referenceId}`)
                                 )
                               )
                           );
@@ -488,7 +498,7 @@ module.exports = function angular(pluginOptions) {
           sourceFileCache?.typeScriptFileCache.set(pathToFileURL(request).href, codeAndMap);
         }
 
-        const resourceFiles = resourceFileMap.get(request) ?? new Set();
+        const resourceFiles = sourceFileToStyleMap.get(request) ?? new Set();
 
         for (const resourceFile of resourceFiles) {
           this.addWatchFile(resourceFile);
@@ -509,18 +519,31 @@ module.exports = function angular(pluginOptions) {
 
       return null;
     },
-    watchChange(id, { event }) {
-      sourceFileCache.invalidate([id]);
+    watchChange(id) {
+      const needInvalidationSourceFiles = new Set();
 
-      if (event === 'delete') {
-        for (const [key, files] of resourceFileMap) {
-          if (files.has(id)) {
-            files.delete(id);
+      function invalidateStyleFile(fileId) {
+        for (const [key, files] of sourceFileToStyleMap) {
+          if (files.has(fileId)) {
+            files.delete(fileId);
+            needInvalidationSourceFiles.add(fileId);
 
-            resourceFileMap.set(key, files);
+            sourceFileToStyleMap.set(key, files);
           }
         }
       }
+
+      if (resourceFileToStyleMap.has(id)) {
+        const styleFiles = resourceFileToStyleMap.get(id);
+
+        for (const styleFile of styleFiles) {
+          invalidateStyleFile(styleFile);
+        }
+
+        resourceFileToStyleMap.delete(id);
+      }
+
+      sourceFileCache.invalidate([...needInvalidationSourceFiles]);
     },
   };
 };
