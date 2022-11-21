@@ -171,7 +171,7 @@ class SourceFileCache extends Map {
   }
 }
 
-module.exports = function angular(pluginOptions) {
+module.exports = function angularCompiler(pluginOptions) {
   let fileEmitter, resolveModule, previousAngularProgram, previousBuilder;
   const fileReferenceIdMap = new Map();
   const babelDataCache = new Map();
@@ -181,7 +181,7 @@ module.exports = function angular(pluginOptions) {
   const sourceFileCache = new SourceFileCache();
 
   return {
-    name: 'angular',
+    name: 'angular-compiler',
     async buildStart() {
       const { NgtscProgram, OptimizeFor, readConfiguration, formatDiagnostics } = await import(
         '@angular/compiler-cli'

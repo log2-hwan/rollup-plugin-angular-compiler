@@ -1,0 +1,26 @@
+name: NPM publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: [self-hosted, gce-n2d]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.12.1'
+      - name: Yarn install
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile --non-interactive --ignore-scripts --production
+      - name: Deploy SDK to NPM
+        run: |
+          yarn package
+          npm set //registry.npmjs.org/:_authToken $NPM_PUBLISH_TOKEN
+          npm --access public publish dist
+        env:
+          NPM_PUBLISH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}

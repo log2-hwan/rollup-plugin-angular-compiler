@@ -79,7 +79,7 @@ module.exports = {
 <html${makeHtmlAttributes(attributes.html)}>
     <head>
         <base href="/">
-        <title>Rollup Angular Plugin Example</title>
+        <title>Rollup Angular Compiler Plugin Example</title>
     </head>
     <body>
         <main-app></main-app>

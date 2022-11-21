@@ -1,5 +1,5 @@
-# rollup-plugin-angular
-Rollup Plugin for Angular AOT Compilation
+# rollup-plugin-angular-angular
+Rollup plugin for angular AOT compilation
 
 Inspired by [Angular CLI esbuild plugin](https://github.com/angular/angular-cli/blob/main/packages/angular_devkit/build_angular/src/builders/browser-esbuild/compiler-plugin.ts)
 
