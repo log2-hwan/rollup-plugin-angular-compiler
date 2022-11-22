@@ -2,7 +2,7 @@ const { rm } = require('fs/promises');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
 const { default: html, makeHtmlAttributes } = require('@rollup/plugin-html');
 const terser = require('@rollup/plugin-terser').default;
-const angular = require('../index');
+const angular = require('../lib/index');
 
 module.exports = {
   input: './example/src/main.ts',

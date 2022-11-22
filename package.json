@@ -2,7 +2,7 @@
   "name": "rollup-plugin-angular-compiler",
   "description": "Rollup plugin for angular AOT compilation",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "@babel/types": "7.20.2",
     "@ngtools/webpack": "15.0.0",
     "ng-packagr": "15.0.0",
+    "piscina": "3.2.0",
     "typescript": "4.8.4"
   },
   "devDependencies": {
@@ -43,6 +44,6 @@
     "zone.js": "0.12.0"
   },
   "scripts": {
-    "package": "mkdir dist || true && cp index.js dist/index.js && cp LICENSE dist/LICENSE && cp package.json dist/package.json"
+    "package": "rm -rf dist && mkdir dist && cp -r lib dist/lib && cp LICENSE dist/LICENSE && cp package.json dist/package.json"
   }
 }
