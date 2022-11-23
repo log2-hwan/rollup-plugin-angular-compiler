@@ -20,7 +20,8 @@ jobs:
       - name: Deploy SDK to NPM
         run: |
           yarn package
+          cd dist
           npm set //registry.npmjs.org/:_authToken $NPM_PUBLISH_TOKEN
-          npm --access public publish dist
+          npm --access public publish
         env:
           NPM_PUBLISH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
