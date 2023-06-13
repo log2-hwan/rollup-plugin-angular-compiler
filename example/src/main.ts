@@ -1,29 +1,25 @@
-import { Component, NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { BrowserModule, platformBrowser } from '@angular/platform-browser';
+import { Component } from '@angular/core';
+import { RouterOutlet, provideRouter } from '@angular/router';
+import { bootstrapApplication } from '@angular/platform-browser';
 import 'zone.js';
 
 @Component({
+  standalone: true,
+  imports: [RouterOutlet],
   selector: 'main-app',
   styleUrls: ['./main.less'],
   template: '<div>Hello</div><router-outlet></router-outlet>',
 })
 export class MainAppComponent {}
 
-@NgModule({
-  imports: [
-    BrowserModule,
-    RouterModule.forRoot([
+bootstrapApplication(MainAppComponent, {
+  providers: [
+    provideRouter([
       {
         path: '',
         pathMatch: 'full',
-        loadChildren: () => import('./route').then(m => m.PageModule),
+        loadChildren: () => import('./route').then(m => m.ROUTES),
       },
     ]),
   ],
-  declarations: [MainAppComponent],
-  bootstrap: [MainAppComponent],
-})
-export class MainModule {}
-
-platformBrowser().bootstrapModule(MainModule);
+});
