@@ -1,16 +1,11 @@
-import { Component, NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component } from '@angular/core';
+import { Route } from '@angular/router';
 
 @Component({
+  standalone: true,
   selector: 'page-app',
   template: '<div>Hello Page</div>',
 })
 export class PageSubAppComponent {}
 
-@NgModule({
-  imports: [
-    RouterModule.forChild([{ path: '', pathMatch: 'full', component: PageSubAppComponent }]),
-  ],
-  declarations: [PageSubAppComponent],
-})
-export class PageSubModule {}
+export const ROUTES: Route[] = [{ path: '', pathMatch: 'full', component: PageSubAppComponent }];
