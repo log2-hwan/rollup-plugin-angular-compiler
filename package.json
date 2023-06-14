@@ -19,16 +19,16 @@
   },
   "homepage": "https://github.com/log2-hwan/rollup-plugin-angular-compiler#readme",
   "dependencies": {
-    "@angular-devkit/build-angular": "16.1.0-rc.0",
-    "@angular/compiler": "16.1.0-rc.0",
-    "@angular/compiler-cli": "16.1.0-rc.0",
+    "@angular-devkit/build-angular": "16.1.0",
+    "@angular/compiler": "16.1.0",
+    "@angular/compiler-cli": "16.1.0",
     "typescript": "5.0.4"
   },
   "devDependencies": {
-    "@angular/common": "16.1.0-rc.0",
-    "@angular/core": "16.1.0-rc.0",
-    "@angular/platform-browser": "16.1.0-rc.0",
-    "@angular/router": "16.1.0-rc.0",
+    "@angular/common": "16.1.0",
+    "@angular/core": "16.1.0",
+    "@angular/platform-browser": "16.1.0",
+    "@angular/router": "16.1.0",
     "@rollup/plugin-html": "1.0.2",
     "@rollup/plugin-node-resolve": "15.1.0",
     "@rollup/plugin-terser": "0.4.3",
